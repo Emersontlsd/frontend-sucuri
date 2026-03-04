@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.Toastify__toast {
+  background-color: #1e293b !important; /* Mesma cor dos seus cards */
+  color: #f8fafc !important;
+  border: 1px solid #334155;
+  border-radius: 12px !important;
+}
+
+.Toastify__toast--success .Toastify__toast-icon svg {
+  fill: #10b981; /* Verde Emerald */
+}
