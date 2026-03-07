@@ -16,19 +16,29 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    // Funções de Máscara em tempo real
+    const maskCPF = (v) => v.replace(/\D/g, "").replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
+    const maskPhone = (v) => v.replace(/\D/g, "").replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3").substring(0, 15);
+
     const handleRegister = async (e) => {
         e.preventDefault();
+        if (loading) return; // Evita cliques duplos
+
         setLoading(true);
-        
-        // Inicia o toast de carregamento
         const idToast = toast.loading("Enviando seu cadastro...");
 
         try {
-            await axios.post('https://backend-sucuri-api.vercel.app/api/auth/register', form);
+            // Limpamos os dados para enviar apenas números ao backend
+            const cleanData = {
+                ...form,
+                cpf: form.cpf.replace(/\D/g, ""),
+                phone: form.phone.replace(/\D/g, "")
+            };
+
+            await axios.post('https://backend-sucuri-api.vercel.app/api/auth/register', cleanData);
             
-            // Sucesso
             toast.update(idToast, { 
-                render: "Cadastro realizado! Aguarde a aprovação do administrador.", 
+                render: "Cadastro realizado! Aguarde a aprovação.", 
                 type: "success", 
                 isLoading: false, 
                 autoClose: 5000 
@@ -36,11 +46,15 @@ export default function Register() {
             
             navigate('/login');
         } catch (err) {
-            // Tratamento de erro
             const errorMessage = err.response?.data?.message || "Erro ao registrar. Tente novamente.";
             
+            // Se o erro for de duplicidade, personalizamos a mensagem
+            const finalMessage = errorMessage.includes("unique constraint") 
+                ? "Este CPF ou E-mail já possui um cadastro pendente." 
+                : errorMessage;
+
             toast.update(idToast, { 
-                render: errorMessage, 
+                render: finalMessage, 
                 type: "error", 
                 isLoading: false, 
                 autoClose: 4000 
@@ -61,61 +75,61 @@ export default function Register() {
                 </div>
                 
                 <form onSubmit={handleRegister} className="space-y-4">
-                    {/* Nome */}
                     <div className="relative">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type="text" 
                             placeholder="Nome Completo" 
                             required 
+                            value={form.name}
                             className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0f172a] border border-slate-600 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" 
                             onChange={e => setForm({ ...form, name: e.target.value })} 
                         />
                     </div>
 
-                    {/* CPF */}
                     <div className="relative">
                         <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type="text" 
-                            placeholder="CPF (apenas números)" 
+                            placeholder="CPF" 
                             required 
+                            value={form.cpf}
                             className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0f172a] border border-slate-600 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" 
-                            onChange={e => setForm({ ...form, cpf: e.target.value })} 
+                            onChange={e => setForm({ ...form, cpf: maskCPF(e.target.value) })} 
                         />
                     </div>
 
-                    {/* Telefone */}
                     <div className="relative">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type="text" 
                             placeholder="Telefone / WhatsApp" 
                             required 
+                            value={form.phone}
                             className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0f172a] border border-slate-600 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" 
-                            onChange={e => setForm({ ...form, phone: e.target.value })} 
+                            onChange={e => setForm({ ...form, phone: maskPhone(e.target.value) })} 
                         />
                     </div>
 
-                    {/* E-mail */}
                     <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type="email" 
                             placeholder="E-mail" 
                             required 
+                            value={form.email}
                             className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0f172a] border border-slate-600 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" 
                             onChange={e => setForm({ ...form, email: e.target.value })} 
                         />
                     </div>
 
-                    {/* Senha */}
                     <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type={showPassword ? "text" : "password"} 
                             placeholder="Senha" 
                             required 
+                            value={form.password}
                             className="w-full pl-12 pr-12 py-3 rounded-xl bg-[#0f172a] border border-slate-600 text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all" 
                             onChange={e => setForm({ ...form, password: e.target.value })} 
                         />
@@ -132,11 +146,7 @@ export default function Register() {
                         disabled={loading}
                         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                     >
-                        {loading ? (
-                            <Loader2 className="animate-spin" size={20} />
-                        ) : (
-                            "Criar Agora"
-                        )}
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : "Criar Agora"}
                     </button>
                 </form>
                 
