@@ -52,7 +52,7 @@ const UserHome = () => {
           <p className="mb-8 opacity-80 max-w-xl mx-auto">
             Acesse a nossa biblioteca protegida para consultar manuais, diretrizes e documentos corporativos autorizados para o seu perfil.
           </p>
-          <button onClick={() => window.location.href='/arquivos'} className="px-10 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all">
+          <button onClick={() => window.location.href='/admin/arquivos'} className="px-10 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all">
             Acessar Meus Arquivos
           </button>
         </section>
