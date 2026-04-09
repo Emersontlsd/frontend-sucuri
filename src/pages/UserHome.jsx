@@ -1,8 +1,12 @@
 import React from 'react';
 import Header from '../components/Header';
 import { Target, Eye, Award, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserHome = () => {
+
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200">
       <Header />
@@ -52,7 +56,7 @@ const UserHome = () => {
           <p className="mb-8 opacity-80 max-w-xl mx-auto">
             Acesse a nossa biblioteca protegida para consultar manuais, diretrizes e documentos corporativos autorizados para o seu perfil.
           </p>
-          <button onClick={() => window.location.href='/admin/arquivos'} className="px-10 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all">
+          <button onClick={() => navigate('/admin/arquivos')} className="px-10 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all">
             Acessar Meus Arquivos
           </button>
         </section>
